@@ -48,7 +48,7 @@ config_domain_header = "off"
 -- 载入IP白名单内容 config_domain_header_value
 -- lua/config/domain_header.lua
 -- 域名额外验证是否跳过其他验证，on 跳过，off继续验证
-config_domain_header_exit = "on"
+config_domain_header_exit = "off"
 config_domain_header_title = "拒绝访问"
 config_domain_header_msg = "不正确的header授权，禁止访问"
 
