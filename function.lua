@@ -21,14 +21,13 @@ function getClientIp()
     -- 获取当前客户端的header头，判断真实IP
     headers = ngx.req.get_headers()
 
-    -- 仅获取真实IP cloudflare:CF-Connecting-IP 未考虑其他cdn
-    clientIp = headers["CF-Connecting-IP"]
-    if clientIp == nil then
-        if type(headers['X-Forwarded-For']) == "table" then
-            clientIp = headers['X-Forwarded-For'][1]
-        else
-            clientIp = headers['X-Forwarded-For']
-        end
+    -- 仅获取真实IP cloudflare:CF-Connecting-IP
+    -- 取消直接获取CF-Connecting-IP，当多层代理时获取的是假IP
+    -- clientIp = headers["CF-Connecting-IP"]
+    if type(headers['X-Forwarded-For']) == "table" then
+        clientIp = headers['X-Forwarded-For'][1]
+    else
+        clientIp = headers['X-Forwarded-For']
     end
 
     if clientIp == nil then
@@ -37,6 +36,12 @@ function getClientIp()
 
     if clientIp == nil then
         clientIp = ngx.var.remote_addr
+    end
+
+    --
+    if preg_match(clientIp,",") then
+        local pos  = string.find(clientIp, ",", 1)
+        clientIp = string.sub(clientIp,1,pos-1)
     end
 
     return clientIp

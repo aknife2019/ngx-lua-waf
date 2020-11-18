@@ -15,7 +15,7 @@ end
 
 -- 排除网站图标请求
 if waf_logs['uri'] ~= '/favicon.ico' then
-    local f = assert(io.open(ngx.ctx.waf_path, "a"))
+    local f = assert(io.open(ngx.ctx.waf_path .. waf_logs["host"] .. '.log', "a"))
     f:write(logs)
     f:close()
 end

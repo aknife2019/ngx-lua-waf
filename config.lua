@@ -3,7 +3,7 @@ config_status = "both"
 -- 日志调试目录
 waf_debug_dir = "/home/wwwlogs/waf-debug.log"
 -- 日志保存目录
-waf_logs_dir = "/home/wwwlogs/waf.log"
+waf_logs_dir = "/home/wwwlogs/"
 -- 日志保存格式 json | string
 waf_logs_type = "string"
 
