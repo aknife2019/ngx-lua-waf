@@ -148,7 +148,12 @@ function sayHtml(title,msg)
             msg = config_msg
         end
 
-        ngx.status = 403
+        if config_weihu == "on" then
+            ngx.status = 200
+            msg = config_weihu_msg
+        else
+            ngx.status = 403
+        end
 
         ngx.say('<!doctype html><html><head><meta charset="utf-8"><title>安全组件拦截提示</title><style>* {-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}html {font-family:sans-serif;font-size:10px;-webkit-tap-highlight-color:rgba(0,0,0,0);}li{color:cadetblue;font-size:24px;}body{margin:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;line-height:1.42857143;color:#333;background-color:#fff;}.container{max-width: 1200px;width:80%;margin:0px auto;}.jumbotron {margin-bottom: 30px;color: inherit;background-color: #eee;border-radius: 6px;padding: 48px 60px;}.jumbotron .h1, .jumbotron h1 {font-size: 60px;}.panel {margin-bottom: 20px;background-color: #fff;border: 1px solid transparent;border-radius: 4px;-webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);box-shadow: 0 1px 1px rgba(0,0,0,.05);}.panel-success {border-color: #d6e9c6;}.panel-success>.panel-heading {color: #3c763d;background-color: #dff0d8;border-color: #d6e9c6;}.panel-error{background-color:#dff0d8;border-color: #d6e9c6;color:gray;}.panel-heading {text-align:center;padding: 10px 15px;border-bottom: 1px solid transparent;border-top-left-radius: 3px;border-top-right-radius: 3px;}.jumbotron p {margin-bottom: 15px;font-size: 21px;font-weight: 200;}</style></head><body><div class="container" style="margin-top:9%;"><div class="jumbotron"><div class="panel panel-error"><div class="panel-heading" style="font-size: 60px;">',title,'</div></div><div class="panel panel-success"><div class="panel-heading"><h1>',msg,'</h1></div></div><p style="text-align:center;margin-top:50px;">时间: ',time,' &nbsp; &nbsp; IP信息: ',clientIp,' &nbsp; &nbsp; <a style="text-decoration:none;color: brown;" href="https://github.com/aknife2019/ngx-lua-waf" target="_blank>ngx-lua-waf</a></p></div></div></body></html>')
         return ngx.exit(ngx.HTTP_OK)
