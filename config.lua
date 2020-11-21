@@ -1,11 +1,16 @@
+-- 是否记录访问日志
+config_access = "off"
+-- 访问日志保存目录
+acc_logs_dir = "/home/wwwlogs/"
+
 -- 防护模式还是日志模式 waf/logs/both
 config_status = "both"
 -- 日志调试目录
 waf_debug_dir = "/home/wwwlogs/waf-debug.log"
--- 日志保存目录
-waf_logs_dir = "/home/wwwlogs/"
--- 日志保存格式 json | string
-waf_logs_type = "string"
+-- 错误日志保存目录
+waf_logs_dir = "/home/waflogs/"
+-- 错误日志保存格式 json | string
+logs_type = "string"
 
 -- 是否开启网站维护模式
 config_weihu = "off"
@@ -43,6 +48,16 @@ config_white_ip_only = "off"
 config_white_ip_only_title = "拒绝访问"
 config_white_ip_only_msg = "您的IP地址未被授权访问"
 
+-- 是否开启URL白名单
+config_url = "off"
+config_url_value = "^/(robots.txt|api.php/\\?.*)$"
+
+-- 是否开启目录限制
+config_dir = "off"
+config_dir_value = "^/(phpmyadmin/|admin/|mysql/)"
+config_dir_title = "拒绝访问"
+config_dir_msg = "未被授权的目录，禁止访问"
+
 -- 是否开启域名header验证
 config_domain_header = "off"
 -- 载入IP白名单内容 config_domain_header_value
@@ -59,12 +74,6 @@ config_proxy = "off"
 -- lua/config/proxy_ip.lua
 config_proxy_title = "拒绝访问"
 config_proxy_msg = "未被授权的代理，禁止访问"
-
--- 是否开启目录限制
-config_dir = "off"
-config_dir_value = "^/(phpmyadmin/|admin/|mysql/)"
-config_dir_title = "拒绝访问"
-config_dir_msg = "未被授权的目录，禁止访问"
 
 -- 是否开启user_agent 过滤/禁止访问的user_agent
 config_user_agent = "off"

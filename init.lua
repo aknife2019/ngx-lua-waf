@@ -10,6 +10,7 @@ end
 -- 域名验证
 function domain_check()
     if config_domain == "on" then
+        local hostName = ngx.var.host
         if config_domain_value[hostName] == nil then
             return sayHtml(config_domain_title,config_domain_msg)
         end
@@ -19,6 +20,7 @@ end
 -- ip黑名单验证
 function black_ip_check()
     if config_balck_ip == "on" then
+        local clientIp = getClientIp()
         local result = ipCheck(clientIp,config_black_ip_value)
 
         if result then
@@ -30,6 +32,7 @@ end
 -- ip白名单验证
 function white_ip_check()
     if config_white_ip == "on" then
+        local clientIp = getClientIp()
         local result = ipCheck(clientIp,config_white_ip_value)
 
         -- 判断是否IP白名单，跳过后续验证
@@ -44,10 +47,30 @@ function white_ip_check()
     end
 end
 
+-- url验证
+function url_check()
+    if config_url == "on"  then
+        if preg_match(ngx.var.request_uri,config_url_value,"ijo") then
+            return ngx.exit(ngx.OK)
+        end
+    end
+end
+
+-- 目录验证
+function dir_check()
+    if config_dir == "on"  then
+        if preg_match(ngx.var.uri,config_dir_value,"ijo") then
+            return sayHtml(config_dir_title,config_dir_msg)
+        end
+    end
+end
+
 -- 域名header验证
 function domain_header_check()
     if config_domain_header == "on"  then
+        local hostName = ngx.var.host
         if config_domain_header_value[hostName] ~= nil then
+            local headers = ngx.req.get_headers()
             if headers[config_domain_header_value[hostName][1]] ~= config_domain_header_value[hostName][2] then
                 return sayHtml(config_domain_header_title,config_domain_header_msg)
             else
@@ -62,6 +85,7 @@ end
 
 -- 反向代理验证
 function proxy_check()
+    local clientIp = getClientIp()
     if config_proxy == "on" and clientIp ~= ngx.var.remote_addr then
         local ipAddress = ngx.var.remote_addr
         local result = ipCheck(ipAddress,config_proxy_value)
@@ -73,18 +97,11 @@ function proxy_check()
     end
 end
 
--- 目录验证
-function dir_check()
-    if config_dir == "on"  then
-        if preg_match(requestUri,config_dir_value,"ijo") then
-            return sayHtml(config_dir_title,config_dir_msg)
-        end
-    end
-end
-
 -- user_agent 验证
 function user_agent_check()
     if config_user_agent == "on" then
+        local userAgent = ngx.var.http_user_agent
+
         -- 判断userAgent是否为空
         if userAgent == nil then
             return sayHtml(config_user_agent_title,config_user_agent_msg)
@@ -145,6 +162,8 @@ end
 
 -- 搜索蜘蛛白名单和真假蜘蛛验证
 function bots_check()
+    local userAgent = ngx.var.http_user_agent
+
     -- 判断是否允许的蜘蛛
     if config_white_bots == "on" then
         if preg_match(userAgent,"(spider|bot)","ijo") and not preg_match(userAgent,config_bots_white_value,"ijo") then
@@ -156,13 +175,14 @@ function bots_check()
     if config_bots_check == "on" and preg_match(userAgent,"(spider|bot)","ijo") then
             for key, value in pairs(config_bots_check_value) do
             -- 判断是否包含待验证的蜘蛛关键字
-            if preg_match(userAgent,key,'ijo') then
+            if preg_match(userAgent,key,"ijo") then
+                local clientIp = getClientIp()
                 -- 验证蜘蛛真假,host 反查ip
                 local handle = io.popen("host " ..clientIp)
                 local result = handle:read("*all")
                 handle:close()
                 --检查是否包含验证域名
-                if not preg_match(result,value,'ijo') then
+                if not preg_match(result,value,"ijo") then
                     -- 检查是否属于此ip段
                     if config_bots_check_ips[key] ~= nil then
                         local result = ipCheck(clientIp,config_bots_check_ips[key])
@@ -223,6 +243,10 @@ function black_limit_check()
             if not ok then
                 return close_redis(red)
             end
+
+            local clientIp = getClientIp()
+            local hostName = ngx.var.host
+            local requestUri = ngx.var.request_uri
 
             local limitKey = "limit:"..clientIp..hostName..requestUri
             local blockIp = "limit:"..clientIp..":block"

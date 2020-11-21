@@ -1,26 +1,28 @@
 require "init"
 
--- 获取当前客户端的header头，判断真实IP
-headers = ngx.req.get_headers()
--- 仅获取真实IP cloudflare:CF-Connecting-IP 未考虑其他cdn
-clientIp = getClientIp()
-if clientIp == nil then
-    clientIp = ngx.var.remote_addr
+if getClientIp() == nil then
     sayHtml('未获取到用户IP','服务器配置错误')
 end
 
-
-hostName = ngx.var.host
-userAgent = ngx.var.http_user_agent
-requestUri = ngx.var.request_uri
+-- 判断是否开启日志
+if config_access == "on" then
+    -- 判断后缀，不记录图片、css、js等静态资源
+    local urlExt = getExt() or ""
+    if not preg_match(urlExt,"(css|js|ico|png|jpg|jpeg|gif|webp)","ijo") then
+        ngx.ctx.acc = getLogs()
+        ngx.ctx.type = logs_type
+        ngx.ctx.acc_path = acc_logs_dir     
+    end
+end
 
 weihu_check()
 domain_check()
 black_ip_check()
 white_ip_check()
+url_check()
+dir_check()
 domain_header_check()
 proxy_check()
-dir_check()
 user_agent_check()
 bots_check()
 black_country_check()
