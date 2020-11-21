@@ -121,7 +121,11 @@ function getLogs()
     local lua_logs = {}
     -- 记录参数到 log_by_lua  段处理
     lua_logs["host"] = ngx.var.host
-    lua_logs["status"] = ngx.status == 0 ? 200 : ngx.status
+    local status = ngx.status
+    if status == 0 then
+        status = 200
+    end
+    lua_logs["status"] = status
     lua_logs["time"] = time
     lua_logs["client"] = getClientIp()
     lua_logs["remote"] = ngx.var.remote_addr
