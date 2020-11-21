@@ -28,9 +28,9 @@ if waf_logs ~= nil or type(waf_logs) == "table" then
     end
 end
 
--- 访问日志
+-- 访问日志,未拦截的时候才记录
 local acc_logs = ngx.ctx.acc
-if acc_logs ~= nil or type(acc_logs) == "table" then
+if waf_logs == nil acc_logs ~= nil or type(acc_logs) == "table" then
     -- 创建目录
     local acc_path = ngx.ctx.acc_path .. acc_logs["host"] .. "/"
     if os.execute("cd "..acc_path) ~= 0 then
