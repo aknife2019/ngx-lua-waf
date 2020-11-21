@@ -27,7 +27,7 @@ config_domain = "off"
 -- 载入域名白名单文件 config_domain_value
 -- lua/config/domain.lua
 -- 提示消息内容
-config_domain_title = "拒绝访问"
+config_domain_title = "403 拒绝访问"
 config_domain_msg = "未被授权的域名，禁止访问"
 
 -- 是否开启IP黑名单
@@ -35,7 +35,7 @@ config_balck_ip = "off"
 -- 载入IP黑名单内容 config_white_ip_value
 -- lua/config/black_ip.lua
 -- 提示消息内容
-config_balck_ip_title = "拒绝访问"
+config_balck_ip_title = "403 拒绝访问"
 config_balck_ip_msg = "您的IP地址被拒绝访问"
 
 -- 是否开启IP白名单
@@ -45,7 +45,7 @@ config_white_ip = "off"
 -- 是否不在IP白名单的都禁止访问
 config_white_ip_only = "off"
 -- 提示消息内容
-config_white_ip_only_title = "拒绝访问"
+config_white_ip_only_title = "403 拒绝访问"
 config_white_ip_only_msg = "您的IP地址未被授权访问"
 
 -- 是否开启URL白名单
@@ -55,7 +55,7 @@ config_url_value = "^/(robots.txt|api.php/\\?.*)$"
 -- 是否开启目录限制
 config_dir = "off"
 config_dir_value = "^/(phpmyadmin/|admin/|mysql/)"
-config_dir_title = "拒绝访问"
+config_dir_title = "403 拒绝访问"
 config_dir_msg = "未被授权的目录，禁止访问"
 
 -- 是否开启域名header验证
@@ -64,7 +64,7 @@ config_domain_header = "off"
 -- lua/config/domain_header.lua
 -- 域名额外验证是否跳过其他验证，on 跳过，off继续验证
 config_domain_header_exit = "off"
-config_domain_header_title = "拒绝访问"
+config_domain_header_title = "403 拒绝访问"
 config_domain_header_msg = "不正确的header授权，禁止访问"
 
 -- 反向代理验证/透明代理/普通匿名代理 
@@ -72,7 +72,7 @@ config_domain_header_msg = "不正确的header授权，禁止访问"
 config_proxy = "off"
 -- 载入IP白名单内容 config_proxy_value_value
 -- lua/config/proxy_ip.lua
-config_proxy_title = "拒绝访问"
+config_proxy_title = "403 拒绝访问"
 config_proxy_msg = "未被授权的代理，禁止访问"
 
 -- 是否开启user_agent 过滤/禁止访问的user_agent
@@ -82,7 +82,7 @@ config_user_agent = "off"
 -- 是否开启 user_agent 白名单 config_user_agent_white
 config_user_agent_white = "off"
 -- 提示消息内容
-config_user_agent_title = "拒绝访问"
+config_user_agent_title = "403 拒绝访问"
 config_user_agent_msg = "伪造/未被授权的 User-Agent"
 
 -- 是否开启蜘蛛白名单，如果user-agent中包含 bot和spider，则验证是否白名单
@@ -91,7 +91,7 @@ config_user_agent_msg = "伪造/未被授权的 User-Agent"
 -- 公用 bots  config_bots_white_value
 config_white_bots = "off"
 -- 提示消息内容
-config_white_bots_title = "拒绝访问"
+config_white_bots_title = "403 拒绝访问"
 config_white_bots_msg = "未被授权的搜索引擎蜘蛛"
 
 -- 是否验证搜索引擎蜘蛛的真实性
@@ -101,7 +101,7 @@ config_bots_check = "off"
 -- 载入蜘蛛验证内容和验证规则 config_bots_check_value
 -- lua/config/bots.lua
 -- 提示消息内容
-config_bots_check_title = "拒绝访问"
+config_bots_check_title = "403 拒绝访问"
 cconfig_bots_check_msg = "伪造的搜索引擎蜘蛛"
 
 -- geo数据库地址
@@ -112,7 +112,7 @@ config_black_country = "off"
 -- 禁止访问的国家验 config_black_country_value
 -- lua/config/black_country.lua
 -- 提示消息内容
-config_black_country_title = "拒绝访问"
+config_black_country_title = "403 拒绝访问"
 config_black_country_msg = "您的IP归属国家被拒绝访问"
 
 -- 是否开启国家白名单
@@ -120,7 +120,7 @@ config_white_country = "off"
 -- 允许访问的国家(开启国家白名单才有效) GeoLite2 中的 [country][name][en]
 -- lua/config/white_country.lua
 -- 提示消息内容
-config_white_country_title = "拒绝访问"
+config_white_country_title = "403 拒绝访问"
 config_white_country_msg = "当前网站已开启区域访问限制"
 
 -- 是否开启cc防护
