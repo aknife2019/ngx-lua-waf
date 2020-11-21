@@ -122,7 +122,6 @@ function getLogs()
     -- 记录参数到 log_by_lua  段处理
     lua_logs["host"] = ngx.var.host
     lua_logs["time"] = time
-    lua_logs["status"] = ngx.status
     lua_logs["client"] = getClientIp()
     lua_logs["remote"] = ngx.var.remote_addr
     lua_logs["uri"] = ngx.var.request_uri
@@ -145,7 +144,7 @@ function sayHtml(title,msg)
         ngx.ctx.type = logs_type
         local waf_logs = getLogs()
         waf_logs["type"] = msg
-        ngx.ctx.waf = getLogs()
+        ngx.ctx.waf = waf_logs
         ngx.ctx.waf_path = waf_logs_dir       
     end
 
