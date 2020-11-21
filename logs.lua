@@ -17,7 +17,7 @@ if waf_logs ~= nil or type(waf_logs) == "table" then
     if ngx.ctx.type == "json" then
         logs = cjson.encode(waf_logs) .. "\n\n"
     else
-        logs =  "请求域名：" .. waf_logs["host"] .."\n请求时间：" .. waf_logs["time"] .."\n客户端IP：" .. waf_logs["client"] .."\nRemote-IP：" .. waf_logs["remote"] .. "\n请求参数：" .. waf_logs["uri"] .. "\n请求方法：" .. waf_logs["method"] .. "\nPOST参数:"..waf_logs["post"] .. "\nUser-Agent：" .. waf_logs["agent"] .. "\n完整Header:" .. cjson.encode(waf_logs['header']) .. "\n拦截规则：" .. waf_logs["type"] .. "\n\n"
+        logs =  "请求域名：" .. waf_logs["host"] .."\n请求时间：" .. waf_logs["time"] .."\n响应代码：" .. waf_logs["status"] .."\n客户端IP：" .. waf_logs["client"] .."\nRemote-IP：" .. waf_logs["remote"] .. "\n请求参数：" .. waf_logs["uri"] .. "\n请求方法：" .. waf_logs["method"] .. "\nPOST参数:"..waf_logs["post"] .. "\nUser-Agent：" .. waf_logs["agent"] .. "\n完整Header:" .. cjson.encode(waf_logs['header']) .. "\n拦截规则：" .. waf_logs["type"] .. "\n\n"
     end
 
     -- 排除网站图标请求
@@ -43,7 +43,7 @@ if acc_logs ~= nil or type(acc_logs) == "table" then
     if ngx.ctx.type == "json" then
         logs = cjson.encode(acc_logs) .. "\n\n"
     else
-        logs =  "请求域名：" .. acc_logs["host"] .."\n请求时间：" .. acc_logs["time"] .."\n客户端IP：" .. acc_logs["client"] .."\nRemote-IP：" .. acc_logs["remote"] .. "\n请求参数：" .. acc_logs["uri"] .. "\n请求方法：" .. acc_logs["method"] .. "\nPOST参数:"..acc_logs["post"] .. "\nUser-Agent：" .. acc_logs["agent"] .. "\n完整Header:" .. cjson.encode(acc_logs['header']) .. "\n\n"
+        logs =  "请求域名：" .. acc_logs["host"] .."\n请求时间：" .. acc_logs["time"] .."\n响应代码：" .. waf_logs["status"] .."\n客户端IP：" .. acc_logs["client"] .."\nRemote-IP：" .. acc_logs["remote"] .. "\n请求参数：" .. acc_logs["uri"] .. "\n请求方法：" .. acc_logs["method"] .. "\nPOST参数:"..acc_logs["post"] .. "\nUser-Agent：" .. acc_logs["agent"] .. "\n\n"
     end
 
     local f = assert(io.open(acc_path..dayDate..".log", "a"))
