@@ -43,7 +43,7 @@ if acc_logs ~= nil or type(acc_logs) == "table" then
     if ngx.ctx.type == "json" then
         logs = cjson.encode(acc_logs) .. "\n\n"
     else
-        logs =  "请求域名：" .. acc_logs["host"] .."\n请求时间：" .. acc_logs["time"] .."\n响应代码：" .. waf_logs["status"] .."\n客户端IP：" .. acc_logs["client"] .."\nRemote-IP：" .. acc_logs["remote"] .. "\n请求参数：" .. acc_logs["uri"] .. "\n请求方法：" .. acc_logs["method"] .. "\nPOST参数:"..acc_logs["post"] .. "\nUser-Agent：" .. acc_logs["agent"] .. "\n完整Header:" .. cjson.encode(acc_logs['header']) .. "\n\n"
+        logs =  "请求域名：" .. acc_logs["host"] .."\n请求时间：" .. acc_logs["time"] .."\n响应代码：" .. acc_logs["status"] .."\n客户端IP：" .. acc_logs["client"] .."\nRemote-IP：" .. acc_logs["remote"] .. "\n请求参数：" .. acc_logs["uri"] .. "\n请求方法：" .. acc_logs["method"] .. "\nPOST参数:"..acc_logs["post"] .. "\nUser-Agent：" .. acc_logs["agent"] .. "\n完整Header:" .. cjson.encode(acc_logs['header']) .. "\n\n"
     end
 
     local f = assert(io.open(acc_path..dayDate..".log", "a"))
