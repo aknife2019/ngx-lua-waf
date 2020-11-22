@@ -19,12 +19,12 @@ end
 
 -- ip黑名单验证
 function black_ip_check()
-    if config_balck_ip == "on" then
+    if config_black_ip == "on" then
         local clientIp = getClientIp()
         local result = ipCheck(clientIp,config_black_ip_value)
 
         if result then
-            return sayHtml(config_balck_ip_title,config_balck_ip_msg)
+            return sayHtml(config_black_ip_title,config_black_ip_msg)
         end
     end
 end
