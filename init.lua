@@ -186,12 +186,16 @@ function bots_check()
                     -- 检查是否属于此ip段
                     if config_bots_check_ips[key] ~= nil then
                         local result = ipCheck(clientIp,config_bots_check_ips[key])
-                        if not result then
+                        if result then
+                            return ngx.exit(ngx.OK)
+                        else
                             return sayHtml(config_bots_check_title,cconfig_bots_check_msg)
                         end
                     else
                         return sayHtml(config_bots_check_title,cconfig_bots_check_msg)
                     end
+                else
+                    return ngx.exit(ngx.OK)
                 end
             end
         end
