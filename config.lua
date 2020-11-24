@@ -29,6 +29,8 @@ config_domain = "off"
 -- 提示消息内容
 config_domain_title = "403 拒绝访问"
 config_domain_msg = "未被授权的域名，禁止访问"
+-- 此值不为空，则非授权域名跳转到此值
+config_domain_redirect = ""
 
 -- 是否开启IP黑名单
 config_balck_ip = "off"

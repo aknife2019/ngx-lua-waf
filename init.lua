@@ -12,7 +12,11 @@ function domain_check()
     if config_domain == "on" then
         local hostName = ngx.var.host
         if config_domain_value[hostName] == nil then
-            return sayHtml(config_domain_title,config_domain_msg)
+            if config_domain_redirect ~=nil and config_domain_redirect ~= "" then
+                return ngx.redirect(config_domain_redirect,301)
+            else
+                return sayHtml(config_domain_title,config_domain_msg)
+            end
         end
     end
 end
