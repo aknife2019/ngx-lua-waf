@@ -12,7 +12,7 @@ function domain_check()
     if config_domain == "on" then
         local hostName = ngx.var.host
         if config_domain_value[hostName] == nil then
-            if config_domain_redirect ~=nil and config_domain_redirect ~= "" then
+            if config_domain_redirect ~= nil and config_domain_redirect ~= "" then
                 return ngx.redirect(config_domain_redirect,301)
             else
                 return sayHtml(config_domain_title,config_domain_msg)
@@ -92,6 +92,7 @@ function proxy_check()
     local clientIp = getClientIp()
     if config_proxy == "on" and clientIp ~= ngx.var.remote_addr then
         local ipAddress = ngx.var.remote_addr
+        -- 校验ip
         local result = ipCheck(ipAddress,config_proxy_value)
 
         -- 判断是否允许的代理ip
@@ -111,19 +112,13 @@ function user_agent_check()
             return sayHtml(config_user_agent_title,config_user_agent_msg)
         end
 
-        -- 判断userAgent是否包含过滤的字段
+        -- 判断userAgent是否包含黑名单关键字
         if preg_match(userAgent,config_user_agent_value,"ijo") then
             return sayHtml(config_user_agent_title,config_user_agent_msg)
         end
 
-        -- 判断userAgent白名单
-        if config_user_agent_white == "on" and preg_match(userAgent,config_user_agent_white_value,"ijo") then
-        else
-            -- 判断userAgent是否为空
-            if userAgent == nil then
-                return sayHtml(config_user_agent_title,config_user_agent_msg)
-            end
-
+        -- 是否开启userAgent简单认证
+        if config_user_agent_auth == "on" then
             local realBrowser = true
 
             -- 浏览器头必定包含Mozilla
@@ -137,7 +132,7 @@ function user_agent_check()
             end
 
             -- IE浏览器 必定包含 Mozilla MSIE|Trident Windows NT
-            if preg_match(userAgent,"(MSIE|Trident)","ijo") and not preg_match(userAgent,"(Mozilla.*MSIE.*Windows NT.*|Mozilla.*Trident.*Gecko.*)$","ijo") then
+            if preg_match(userAgent,"(MSIE|Trident)","ijo") and not preg_match(userAgent,"(Mozilla.*MSIE.*Windows NT.*|Mozilla.*Trident.*)$","ijo") then
                 realBrowser = false
             end
 
@@ -145,14 +140,14 @@ function user_agent_check()
             if preg_match(userAgent,"Safari","ijo") and not preg_match(userAgent,"^Mozilla.*AppleWebKit.*Gecko.*Safari.*$","ijo") then
                 realBrowser = false
             end
-
-            -- Chrome 必定包含 Mozilla AppleWebKit Gecko Chrome Safari
-            if preg_match(userAgent,"Chrome","ijo") and not preg_match(userAgent,"^Mozilla.*AppleWebKit.*Gecko.*Chrome.*Safari.*$","ijo") then
+    
+            -- edge 必定包含 Mozilla AppleWebKit Gecko Safari Edg
+            if preg_match(userAgent,"Edg","ijo") and not preg_match(userAgent,"^Mozilla.*AppleWebKit.*Gecko.*(Safari.*Edg|Edg.*Safari).*$","ijo") then
                 realBrowser = false
             end
 
-            -- edge 必定包含 Mozilla AppleWebKit Gecko Chrome Safari Edg
-            if preg_match(userAgent,"Edg","ijo") and not preg_match(userAgent,"^Mozilla.*AppleWebKit.*Gecko.*Chrome.*Safari.*Edg.*$","ijo") then
+            -- Chrome 必定包含 Mozilla AppleWebKit Gecko Chrome Safari
+            if preg_match(userAgent,"Chrome","ijo") and not preg_match(userAgent,"^Mozilla.*AppleWebKit.*Gecko.*Chrome.*Safari.*$","ijo") then
                 realBrowser = false
             end
 
@@ -223,7 +218,7 @@ function white_country_check()
         local country = getCountry()
 
         if not country then
-            return sayHtml("服务器错误","IP获取失败！")
+            return sayHtml("服务器错误","IP归属地获取失败！")
         else
             if config_white_country_value[country] == nil then
                 return sayHtml(config_white_country_title,config_white_country_msg)
@@ -235,62 +230,57 @@ end
 -- 防刷新验证
 function black_limit_check()
     if config_black_limit == "on" then
-        local urlExt = getExt()
-        if preg_match(urlExt,config_limit_ext,"ijo") ~= nil then
-            return ngx.exit(ngx.OK)
-        else
-            -- 调用redis脚本
-            local redis = require "redis"
-            -- 创建redis实例
-            local red = redis:new()
-            -- 设置redis超时时间
-            red:set_timeout(1000)
-            -- 连接redis服务
-            local ok, err = red:connect(config_redis_ip,config_redis_port)
-            -- 连接失败报错
-            if not ok then
-                return close_redis(red)
-            end
-
-            local clientIp = getClientIp()
-            local hostName = ngx.var.host
-            local requestUri = ngx.var.request_uri
-
-            local limitKey = "limit:"..clientIp..hostName..requestUri
-            local blockIp = "limit:"..clientIp..":block"
-            local blockTime = "limit:"..clientIp..":time"
-
-            -- 判断ip是否被拒绝
-            local is_block,err = red:get(blockIp)
-            if tonumber(is_block) == 1 then
-                local block_time,err = red:get(blockTime)
-                local block_end_time = config_black_limit_second - ( ngx.time() - block_time )
-
-                -- 关闭redis
-                close_redis(red)
-                return sayHtml(config_black_limit_title,ngx.re.sub(config_black_limit_msg,"#block_end_time#",block_end_time))
-            end
-
-            -- 判断ip是否正常
-            -- incr key值不存在则设置为1，存在则自增1
-            res, err = red:incr(limitKey)
-            if res == 1 then
-                -- expire 用于设置 key 的过期时间，key 过期后将不再可用。单位以秒计
-                res, err = red:expire(limitKey,1)
-            end
-
-            -- 如果每秒访问次数大于 config_black_limit_nums，则加入黑名单，限制config_black_limit_second秒
-            if res > config_black_limit_nums then
-                -- 设置限制的ip和限制时间
-                red:set(blockIp,1)
-                red:expire(blockIp,config_black_limit_second)
-                -- 记录封禁时间，用于倒计时
-                red:set(blockTime,ngx.time())
-                red:expire(blockTime,config_black_limit_second)
-            end
-
-            -- 关闭redis连接
-            close_redis(red)
+        -- 调用redis脚本
+        local redis = require "redis"
+        -- 创建redis实例
+        local red = redis:new()
+        -- 设置redis超时时间
+        red:set_timeout(1000)
+        -- 连接redis服务
+        local ok, err = red:connect(config_redis_ip,config_redis_port)
+        -- 连接失败报错
+        if not ok then
+            return close_redis(red)
         end
+
+        local clientIp = getClientIp()
+        local hostName = ngx.var.host
+        local requestUri = ngx.var.request_uri
+
+        local limitKey = "limit:"..clientIp..hostName..requestUri
+        local blockIp = "limit:"..clientIp..":block"
+        local blockTime = "limit:"..clientIp..":time"
+
+        -- 判断ip是否被拒绝
+        local is_block,err = red:get(blockIp)
+        if tonumber(is_block) == 1 then
+            local block_time,err = red:get(blockTime)
+            local block_end_time = config_black_limit_second - ( ngx.time() - block_time )
+
+            -- 关闭redis
+            close_redis(red)
+            return sayHtml(config_black_limit_title,ngx.re.sub(config_black_limit_msg,"#block_end_time#",block_end_time))
+        end
+
+        -- 判断ip是否正常
+        -- incr key值不存在则设置为1，存在则自增1
+        res, err = red:incr(limitKey)
+        if res == 1 then
+            -- expire 用于设置 key 的过期时间，key 过期后将不再可用。单位以秒计
+            res, err = red:expire(limitKey,1)
+        end
+
+        -- 如果每秒访问次数大于 config_black_limit_nums，则加入黑名单，限制config_black_limit_second秒
+        if res > config_black_limit_nums then
+            -- 设置限制的ip和限制时间
+            red:set(blockIp,1)
+            red:expire(blockIp,config_black_limit_second)
+            -- 记录封禁时间，用于倒计时
+            red:set(blockTime,ngx.time())
+            red:expire(blockTime,config_black_limit_second)
+        end
+
+        -- 关闭redis连接
+        close_redis(red)
     end
 end

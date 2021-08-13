@@ -4,6 +4,9 @@ if getClientIp() == nil then
     sayHtml('未获取到用户IP','服务器配置错误')
 end
 
+-- 执行自定义配置
+custom()
+
 -- 判断是否开启日志
 if config_access == "on" then
     -- 判断后缀，不记录图片、css、js等静态资源

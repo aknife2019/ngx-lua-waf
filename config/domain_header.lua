@@ -1,2 +1,2 @@
 config_domain_header_value = {}
-config_domain_header_value['test.aknife.cn'] = {'Access-Value','Aknife.Cn'}
+config_domain_header_value['域名'] = {"Header名称","Header值"}

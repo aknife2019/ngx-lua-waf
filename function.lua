@@ -1,19 +1,25 @@
+-- 函数判断规则
+preg_match = ngx.re.find
+
 -- 载入配置文件
 require "config"
 
 -- 载入配置文件
 require "black_ip"
 require "white_ip"
+require "white_url"
+require "black_dir"
 require "proxy_ip"
+require "useragent"
 require "domain"
 require "domain_header"
-require "user_agent"
 require "bots"
 require "black_country"
 require "white_country"
 
--- 函数判断规则 --
-preg_match = ngx.re.find
+-- 覆盖配置文件
+require "env"
+
 
 -- 获取客户端IP
 function getClientIp()
@@ -36,7 +42,6 @@ function getClientIp()
         clientIp = ngx.var.remote_addr
     end
 
-    --
     if preg_match(clientIp,",") then
         local pos  = string.find(clientIp, ",", 1)
         clientIp = string.sub(clientIp,1,pos-1)
@@ -120,7 +125,7 @@ function getLogs()
     
     local lua_logs = {}
     -- 记录参数到 log_by_lua  段处理
-    lua_logs["host"] = ngx.var.host
+    lua_logs["host"] = ngx.re.sub(ngx.var.host,"www.","")
     local status = ngx.status
     if status == 0 then
         status = 200
@@ -129,9 +134,12 @@ function getLogs()
     lua_logs["time"] = time
     lua_logs["client"] = getClientIp()
     lua_logs["remote"] = ngx.var.remote_addr
+    local headers = ngx.req.get_headers()
+    lua_logs["xffip"] = headers["X-Forwarded-For"]
+    lua_logs["cfip"] = headers["CF-Connecting-IP"]
     lua_logs["uri"] = ngx.var.request_uri
     lua_logs["method"] = ngx.var.request_method
-    -- 开启获取body数据
+     -- 开启获取body数据
     ngx.req.read_body()
     lua_logs["post"] = ngx.req.get_body_data() or ""
     lua_logs["agent"] = ngx.var.http_user_agent
@@ -145,7 +153,7 @@ function sayHtml(title,msg)
     -- 获取当前服务器时间
     local time = os.date("%Y-%m-%d %H:%M:%S")
 
-    if config_status == "logs" or config_status == "both" then
+    if config_status == "waf" or config_status == "logs" then
         ngx.ctx.type = logs_type
         local waf_logs = getLogs()
         waf_logs["type"] = msg
@@ -153,7 +161,7 @@ function sayHtml(title,msg)
         ngx.ctx.waf_path = waf_logs_dir       
     end
 
-    if config_status == "waf" or config_status == "both" then
+    if config_status == "waf" then
         -- 判断是否启用统一返回信息
         if config_msg ~= "" then
             msg = config_msg
@@ -166,7 +174,7 @@ function sayHtml(title,msg)
             ngx.status = 403
         end
 
-        ngx.say("<!doctype html><html><head><meta charset='utf-8'><title>安全组件拦截提示</title><style>* {-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}html {font-family:sans-serif;font-size:10px;-webkit-tap-highlight-color:rgba(0,0,0,0);}li{color:cadetblue;font-size:24px;}body{margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.42857143;color:#333;background-color:#fff;}.container{max-width: 1200px;width:80%;margin:0px auto;}.jumbotron {margin-bottom: 30px;color: inherit;background-color: #eee;border-radius: 6px;padding: 48px 60px;}.jumbotron .h1, .jumbotron h1 {font-size: 60px;}.panel {margin-bottom: 20px;background-color: #fff;border: 1px solid transparent;border-radius: 4px;-webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);box-shadow: 0 1px 1px rgba(0,0,0,.05);}.panel-success {border-color: #d6e9c6;}.panel-success>.panel-heading {color: #3c763d;background-color: #dff0d8;border-color: #d6e9c6;}.panel-error{background-color:#dff0d8;border-color: #d6e9c6;color:gray;}.panel-heading {text-align:center;padding: 10px 15px;border-bottom: 1px solid transparent;border-top-left-radius: 3px;border-top-right-radius: 3px;}.jumbotron p {margin-bottom: 15px;font-size: 21px;font-weight: 200;}</style></head><body><div class='container' style='margin-top:9%;'><div class='jumbotron'><div class='panel panel-error'><div class='panel-heading' style='font-size: 60px;'>",title,"</div></div><div class='panel panel-success'><div class='panel-heading'><h1>",msg,"</h1></div></div><p style='text-align:center;margin-top:50px;'>时间: ",time," &nbsp; &nbsp; IP信息: ",getClientIp()," &nbsp; &nbsp; <a style='text-decoration:none;color: brown;' href='https://github.com/aknife2019/ngx-lua-waf' target='_blank'>ngx-lua-waf</a></p></div></div></body></html>")
+        ngx.say("<!doctype html><html><head><meta charset='utf-8'><title>安全组件拦截提示</title><style>* {-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}html {font-family:sans-serif;font-size:10px;-webkit-tap-highlight-color:rgba(0,0,0,0);}li{color:cadetblue;font-size:24px;}body{margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.42857143;color:#333;background-color:#fff;}.container{max-width: 1200px;width:80%;margin:0px auto;}.jumbotron {margin-bottom: 30px;color: inherit;background-color: #eee;border-radius: 6px;padding: 48px 60px;}.jumbotron .h1, .jumbotron h1 {font-size: 60px;}.panel {margin-bottom: 20px;background-color: #fff;border: 1px solid transparent;border-radius: 4px;-webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);box-shadow: 0 1px 1px rgba(0,0,0,.05);}.panel-success {border-color: #d6e9c6;}.panel-success>.panel-heading {color: #3c763d;background-color: #dff0d8;border-color: #d6e9c6;}.panel-error{background-color:#dff0d8;border-color: #d6e9c6;color:gray;}.panel-heading {text-align:center;padding: 10px 15px;border-bottom: 1px solid transparent;border-top-left-radius: 3px;border-top-right-radius: 3px;}.jumbotron p {margin-bottom: 15px;font-size: 21px;font-weight: 200;}</style></head><body><div class='container' style='margin-top:9%;'><div class='jumbotron'><div class='panel panel-error'><div class='panel-heading' style='font-size: 60px;'>",title,"</div></div><div class='panel panel-success'><div class='panel-heading'><h1>",msg,"</h1></div></div><p style='text-align:center;margin-top:50px;'>时间: ",time," &nbsp; &nbsp; IP信息: ",getClientIp(),"</p></div></div></body></html>")
         return ngx.exit(ngx.HTTP_OK)
     end
 end
