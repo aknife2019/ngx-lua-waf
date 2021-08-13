@@ -56,6 +56,8 @@ config_dir_msg = "未被授权的目录，禁止访问"
 
 -- 是否开启域名header验证
 config_domain_header = "off"
+-- 静态资源后缀，用于排除header验证
+config_static_ext = "(css|js|jpeg|jpg|png|gif|bmp|ico|webp)"
 -- 载入域名header验证内容
 -- lua/config/domain_header.lua
 -- 域名额外验证是否跳过其他验证，on 跳过，off继续验证

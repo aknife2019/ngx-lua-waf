@@ -45,6 +45,8 @@ config_dir = "off"
 
 -- 是否开启域名header验证
 config_domain_header = "off"
+-- 静态资源后缀，用于排除header验证
+config_static_ext = "(css|js|jpeg|jpg|png|gif|bmp|ico|webp)"
 -- 域名额外验证是否跳过其他验证，on 跳过，off继续验证
 config_domain_header_exit = "off"
 -- 追加值

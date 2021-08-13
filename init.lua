@@ -72,6 +72,12 @@ end
 -- 域名header验证
 function domain_header_check()
     if config_domain_header == "on"  then
+        -- 静态资源不验证header
+        local urlExt = getExt()
+        if urlExt ~= nil and preg_match(urlExt,config_static_ext,"ijo") then
+            return ngx.exit(ngx.OK)
+        end
+
         local hostName = ngx.var.host
         if config_domain_header_value[hostName] ~= nil then
             local headers = ngx.req.get_headers()
