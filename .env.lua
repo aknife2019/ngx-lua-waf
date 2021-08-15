@@ -22,7 +22,7 @@ config_domain_redirect = ""
 -- config_domain_value['域名'] = "备注"
 
 -- 是否开启IP黑名单
-config_balck_ip = "off"
+config_black_ip = "off"
 -- 追加值
 -- config_black_ip_value["IP地址"] = "备注"
 

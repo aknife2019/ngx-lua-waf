@@ -25,12 +25,12 @@ config_domain_msg = "未被授权的域名，禁止访问"
 config_domain_redirect = ""
 
 -- 是否开启IP黑名单
-config_balck_ip = "off"
+config_black_ip = "off"
 -- 载入IP黑名单内容
 -- lua/config/black_ip.lua
 -- 提示消息内容
-config_balck_ip_title = "403 拒绝访问"
-config_balck_ip_msg = "您的IP地址被拒绝访问"
+config_black_ip_title = "403 拒绝访问"
+config_black_ip_msg = "您的IP地址被拒绝访问"
 
 -- 是否开启IP白名单
 config_white_ip = "off"
