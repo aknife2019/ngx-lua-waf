@@ -157,6 +157,12 @@ function user_agent_check()
                 realBrowser = false
             end
 
+            -- 旧版Opera
+            if preg_match(userAgent,"Opera","ijo") and not preg_match(userAgent,"^Opera.*Presto.*Version.*$","ijo") then
+                realBrowser = false
+            end
+    
+
             -- 不是蜘蛛的时候，判断浏览器真假
             if not realBrowser and not preg_match(userAgent,"(spider|bot)","ijo") then
                 return sayHtml(config_user_agent_title,config_user_agent_msg)
@@ -187,20 +193,10 @@ function bots_check()
                 local result = handle:read("*all")
                 handle:close()
                 --检查是否包含验证域名
-                if not preg_match(result,value,"ijo") then
-                    -- 检查是否属于此ip段
-                    if config_bots_check_ips[key] ~= nil then
-                        local result = ipCheck(clientIp,config_bots_check_ips[key])
-                        if result then
-                            return ngx.exit(ngx.OK)
-                        else
-                            return sayHtml(config_bots_check_title,cconfig_bots_check_msg)
-                        end
-                    else
-                        return sayHtml(config_bots_check_title,cconfig_bots_check_msg)
-                    end
-                else
+                if preg_match(result,value,"ijo") then
                     return ngx.exit(ngx.OK)
+                else
+                    return sayHtml(config_bots_check_title,cconfig_bots_check_msg)
                 end
             end
         end
