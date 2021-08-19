@@ -38,7 +38,7 @@ function white_ip_check()
     if config_white_ip == "on" then
         local clientIp = ngx.var.remote_addr
         local result = ipCheck(clientIp,config_white_ip_value)
-
+        
         -- 判断是否IP白名单，跳过后续验证
         if result then
             return ngx.exit(ngx.OK)
@@ -48,6 +48,14 @@ function white_ip_check()
         if config_white_ip_only == "on" and result == false then
             return sayHtml(config_white_ip_only_title,config_white_ip_only_msg)
         end
+    end
+end
+
+-- 反向代理验证
+function proxy_check()
+    local clientIp = getClientIp()
+    if config_proxy == "on" and clientIp ~= ngx.var.remote_addr then
+        return sayHtml(config_proxy_title,config_proxy_msg)
     end
 end
 
@@ -90,14 +98,6 @@ function domain_header_check()
                 end
             end
         end
-    end
-end
-
--- 反向代理验证
-function proxy_check()
-    local clientIp = getClientIp()
-    if config_proxy == "on" and clientIp ~= ngx.var.remote_addr then
-        return sayHtml(config_proxy_title,config_proxy_msg)
     end
 end
 

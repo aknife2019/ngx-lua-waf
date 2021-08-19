@@ -28,7 +28,7 @@ config_white_ip_value["2c0f:f248::/32"] = "cloudflare IPV6"
 -- 360蜘蛛IP段
 config_white_ip_value["180.153.232.0/24"] = "360蜘蛛"
 config_white_ip_value["180.153.234.0/24"] = "360蜘蛛"
-config_white_ip_value["180.153.236.0.24"] = "360蜘蛛"
+config_white_ip_value["180.153.236.0/24"] = "360蜘蛛"
 config_white_ip_value["180.163.220.0/24"] = "360蜘蛛"
 config_white_ip_value["42.236.101.0/24"] = "360蜘蛛"
 config_white_ip_value["42.236.102.0/24"] = "360蜘蛛"
