@@ -81,7 +81,7 @@ config_user_agent = "off"
 config_user_agent_auth = "off"
 -- 提示消息内容
 config_user_agent_title = "403 拒绝访问"
-config_user_agent_msg = "伪造/未被授权的 User-Agent"
+config_user_agent_msg = "未被识别的浏览器标识(UserAgent)"
 
 -- 是否开启蜘蛛白名单，如果user-agent中包含 bot和spider，则验证是否白名单
 -- 用于排除遵守robots规则的其他搜索引擎或第三方蜘蛛，如Semrush，BotDotBot等
