@@ -24,7 +24,7 @@ end
 -- ip黑名单验证
 function black_ip_check()
     if config_black_ip == "on" then
-        local clientIp = getClientIp()
+        local clientIp = ngx.var.remote_addr
         local result = ipCheck(clientIp,config_black_ip_value)
 
         if result then
@@ -36,7 +36,7 @@ end
 -- ip白名单验证
 function white_ip_check()
     if config_white_ip == "on" then
-        local clientIp = getClientIp()
+        local clientIp = ngx.var.remote_addr
         local result = ipCheck(clientIp,config_white_ip_value)
 
         -- 判断是否IP白名单，跳过后续验证
@@ -97,14 +97,7 @@ end
 function proxy_check()
     local clientIp = getClientIp()
     if config_proxy == "on" and clientIp ~= ngx.var.remote_addr then
-        local ipAddress = ngx.var.remote_addr
-        -- 校验ip
-        local result = ipCheck(ipAddress,config_proxy_value)
-
-        -- 判断是否允许的代理ip
-        if not result then
-            return sayHtml(config_proxy_title,config_proxy_msg)
-        end
+        return sayHtml(config_proxy_title,config_proxy_msg)
     end
 end
 
