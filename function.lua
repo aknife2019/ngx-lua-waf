@@ -1,33 +1,14 @@
 -- 函数判断规则
-preg_match = ngx.re.find
+preg_find = ngx.re.find
+preg_match = ngx.re.match
 
 -- 载入配置文件
 require "config"
-
--- 载入配置文件
-require "black_ip"
-require "white_ip"
-require "white_url"
-require "black_dir"
-require "proxy_ip"
-require "useragent"
-require "domain"
-require "domain_header"
-require "bots"
-require "black_country"
-require "white_country"
-
--- 覆盖配置文件
-require "env"
-
 
 -- 获取客户端IP
 function getClientIp()
     local headers = ngx.req.get_headers()
     local clientIp = nil
-    -- 仅获取真实IP cloudflare:CF-Connecting-IP
-    -- 取消直接获取CF-Connecting-IP，当多层代理时获取的是假IP
-    -- clientIp = headers["CF-Connecting-IP"]
     if type(headers["X-Forwarded-For"]) == "table" then
         clientIp = headers["X-Forwarded-For"][1]
     else
@@ -42,7 +23,7 @@ function getClientIp()
         clientIp = ngx.var.remote_addr
     end
 
-    if preg_match(clientIp,",") then
+    if preg_find(clientIp,",") then
         local pos  = string.find(clientIp, ",", 1)
         clientIp = string.sub(clientIp,1,pos-1)
     end
@@ -52,7 +33,6 @@ end
 
 -- 根据ip地址获取国家
 function getCountry()
-    local cjson = require "cjson"
     local geo = require "maxminddb"
 
     if not geo.initted() then
@@ -63,7 +43,7 @@ function getCountry()
     if not res then
         return false
     else
-        return res["country"]["iso_code"]
+        return res["code"]
     end
 end
 
@@ -78,6 +58,39 @@ function ipCheck(ipAddress,ipValue)
         return false
     end
 end
+
+-- 验证蜘蛛真假
+function botsCheckResult(userAgent,clientIp)
+    -- 获取匹配的蜘蛛名称
+    local botAgent,err = preg_match(userAgent,config_bots_white_value,"ijo")
+
+    -- 验证规则
+    local botAgentRule = config_bots_check_value[botAgent[0]]
+
+    if type(botAgentRule) == "table" then
+        local ipmatcher = require "ipmatcher"
+        local ip, err = ipmatcher.new(botAgentRule)
+        local data, err = ip:match(clientIp)
+
+        if data then
+            return true
+        else
+            return false
+        end
+    else
+        -- 验证蜘蛛真假,host 反查ip
+        local handle = io.popen("host " ..clientIp)
+        local result = handle:read("*all")
+        handle:close()
+        --检查是否包含验证域名
+        if preg_find(result,botAgentRule,"ijo") then
+            return true
+        else
+            return false
+        end
+    end
+end
+
 
 -- 关闭redis连接
 function close_redis(red)
@@ -112,17 +125,10 @@ function getExt()
     return ext
 end
 
--- 调试
-function debug(logs)
-    local f = assert(io.open(waf_debug_dir, "a"))
-    f:write(logs.."\n\n")
-    f:close()
-end
-
 -- 获取请求参数
 function getLogs()
     local time = os.date("%Y-%m-%d %H:%M:%S")
-    
+
     local lua_logs = {}
     -- 记录参数到 log_by_lua  段处理
     lua_logs["host"] = ngx.re.sub(ngx.var.host,"www.","")
@@ -158,7 +164,7 @@ function sayHtml(title,msg)
         local waf_logs = getLogs()
         waf_logs["type"] = msg
         ngx.ctx.waf = waf_logs
-        ngx.ctx.waf_path = waf_logs_dir       
+        ngx.ctx.waf_path = waf_logs_dir
     end
 
     if config_status == "waf" then
