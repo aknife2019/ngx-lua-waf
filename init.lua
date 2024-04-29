@@ -51,7 +51,7 @@ end
 -- ip白名单验证
 function white_ip_check()
     if config_white_ip == "on" then
-        local clientIp = ngx.var.remote_addr
+        local clientIp = getClientIp()
         local result = ipCheck(clientIp,config_white_ip_value)
 
         -- 判断是否IP白名单，跳过后续验证
